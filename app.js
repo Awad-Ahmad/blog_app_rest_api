@@ -15,7 +15,7 @@ app.use(bodyParser.urlencoded());
 
 
 mongoose
-  .connect("mongodb://localhost:27017/blog_app_with_flutter", {
+  .connect(process.env.MONGODB_URI || "mongodb://localhost:27017/blog_app_with_flutter", {
     useNewUrlParser: true,
   })
   .then(console.log("connected successfully ")).catch((error)=>{
