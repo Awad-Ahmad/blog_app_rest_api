@@ -2,6 +2,9 @@ const Category = require("../models/category");
 const User = require("../models/user");
 const { Blog } = require("../models/blog");
 const blogRouter = require("../routes/blog");
+const mongoose = require("mongoose");
+var ObjectId = require("mongodb").ObjectId;
+
 exports.add_blog = (req, res) => {
   User.find({ _id: req.userId })
     .then((user) => {
@@ -60,7 +63,7 @@ exports.add_blog = (req, res) => {
             });
           });
       } else {
-        try { 
+        try {
           filePath = path.join(__dirname, "../../", req.files.path[0]);
           fs.unlink(filePath, (error) => {
             console.log(error);
@@ -90,14 +93,16 @@ exports.add_blog = (req, res) => {
     });
 };
 exports.get_all_blog_for_timeline = (req, res) => {
+    blogOfUser = [];
+    blogOfFollowings=[];
   User.find({ _id: req.userId })
     .then(async (user) => {
       if (user[0].followings.length > 0) {
         for (let i = 0; i < user[0].followings.length; i++) {
           try {
-            var blogOfFollowings = await Blog.find({
+             blogOfFollowings.push (await Blog.find({
               userId: user[0].followings[i],
-            }).sort({ createdAt: -1 });
+            }).sort({ createdAt: -1 }));
           } catch (error) {
             res.status(500).json({ error: error.message });
           }
@@ -106,32 +111,74 @@ exports.get_all_blog_for_timeline = (req, res) => {
         blogOfFollowings = [];
       }
       try {
-        catNames = [];
-        catNames = await Promise.all(
-          user[0].categoriesFollowings.map((catId) => {
-            Category.find({ _id: catId }).then((value) => {
+        var catNames = [];
+        for (let i = 0; i < user[0].categoriesFollowings.length; i++) {
+          await Category.findOne({ _id: user[0].categoriesFollowings[i] })
+            .then((value) => {
               catNames.push(value);
+            })
+            .catch((error) => {
+              res.status(500).json({
+                error: error.message,
+              });
             });
-          })
-        );
-
-        blogOfUser = [];
-        await Promise.all(
-          catNames.map((catName) => {
-            Blog.find({ categoryName: catName }).then((value) => {
-              blogOfUser.push(value);
-            });
-          })
-        );
-
-        // var blogOfUser = await Blog.find({ userId: req.userId }).sort({createdAt: -1});
+        }
       } catch (error) {
         res.status(500).json({
           error: error.message,
         });
       }
+      try {
+        for (let i = 0; i < catNames.length; i++) {
+          theBlog = await Blog.find({ categoryName: catNames[i].name })
+            .where("userId")
+            .ne(user[0]._id)
+            .sort({ createdAt: -1 })
+            .then((blogs) => {
+              blogOfUser.push(blogs);
+            })
+            .catch((error) => {
+              res.status(500).json({
+                error: error.message,
+              });
+            });
+        }
+      } catch (error) {
+        return res.status(500).json({
+          error: error.message,
+        });
+      }
 
-      res.status(200).json(blogOfUser.concat(...blogOfFollowings));
+      var allBlogs = blogOfUser.flat().concat(...blogOfFollowings);
+      let blogUserIds = [];
+      let blogIds = [];
+      console.log(allBlogs)
+
+      for (let i = 0; i < allBlogs.length; i++) {
+        blogIds.push(allBlogs[i]._id);
+      }
+      for (let i = 0; i < allBlogs.length; i++) {
+        blogUserIds.push(allBlogs[i].useId);
+      }
+      let c = 0;
+      for (let i = 0; i < allBlogs.length; i++) {
+        c = 0;
+        for (let j = 0; j < allBlogs.length; j++) {
+          if (allBlogs[i]._id.equals(allBlogs[j]._id)) {
+            if (allBlogs[i].userId === allBlogs[j].userId) {
+              console.log(allBlogs[i].userId);
+            }
+            c++;
+          }
+
+          if (c > 1) {
+            allBlogs.splice(i, 1);
+            break;
+          }
+        }
+      }
+
+      res.status(200).json(allBlogs);
     })
     .catch((error) => {
       res.status(500).json({
@@ -188,6 +235,25 @@ exports.get_all_my_blogs = (req, res) => {
       });
     });
 };
+exports.get__all_blogs = (req, res) => {
+  Blog.find()
+    .sort({ createdAt: 1 })
+    .then((value) => {
+      let sortedBlogs = value.sort(
+        (a, b) => b.numOfReads.length - a.numOfReads.length
+      );
+      if (value.length >= 1) {
+        res.status(200).json(sortedBlogs);
+      } else {
+        res.status(404).json([]);
+      }
+    })
+    .catch((error) => {
+      res.status(500).json({
+        error: error.message,
+      });
+    });
+};
 exports.get_blogs_for_specific_user = (req, res) => {
   Blog.find({ userId: req.params.userId })
     .then((blogs) => {
@@ -201,5 +267,35 @@ exports.get_blogs_for_specific_user = (req, res) => {
       res.status(500).json({
         error: error.message,
       });
+    });
+};
+exports.add_to_blog_a_read = (req, res) => {
+  Blog.find({ _id: req.params.blogId })
+    .then((blogs) => {
+      if (blogs.length >= 1) {
+        blogs[0]
+          .updateOne({
+            $push: {
+              numOfReads: 1,
+            },
+          })
+          .then((value) => {
+            res.status(200).json({
+              message: "the reads of blog is increased successfully",
+            });
+          })
+          .catch((error) => {
+            res.status(500).json({
+              error: error.message,
+            });
+          });
+      } else {
+        return res.status(404).json({
+          message: "the blog is not found",
+        });
+      }
+    })
+    .catch((error) => {
+      return res.status(500).json({ error: error });
     });
 };

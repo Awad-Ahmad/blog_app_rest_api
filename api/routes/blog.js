@@ -41,4 +41,6 @@ blogRouter.get("/blogs-for-specific-category/:categoryName",auth,blogController.
 blogRouter.post("/search_for_blog/:blogTitle",auth,blogController.search_for_blogs)
 blogRouter.get("/get-all-my-blogs",auth,blogController.get_all_my_blogs)
 blogRouter.post("/get-blogs-for-specific-user/:userId",auth,blogController.get_blogs_for_specific_user)
+blogRouter.get("/",blogController.get__all_blogs)
+blogRouter.post("/add-to-blog-a-read/:blogId",auth,blogController.add_to_blog_a_read)
 module.exports = blogRouter;

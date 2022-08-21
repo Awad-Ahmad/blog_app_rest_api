@@ -38,6 +38,7 @@ userRouter.post("/follow-category/:categoryId",auth,userController.follow_catego
 userRouter.post("/un-follow-category/:categoryId",auth,userController.un_follow_category)
 userRouter.post("/upload-user-images",auth,upload.single("coverPicture"),userController.upload_user_images)
 userRouter.post("/search-for-user/:userName",auth,userController.search_for_user)
+userRouter.get("",auth,userController.get_all_users)
 module.exports=userRouter
 
 

@@ -26,12 +26,13 @@ const blogSchema = new mongoose.Schema(
     },
     categoryName: {
       type: String,
-      required: true,
+      required: true, 
     },
     isBookMarked:{
       type:Boolean,
       default:false
-    }
+    },
+    numOfReads:[]
   },
   { timestamps: true }
 );

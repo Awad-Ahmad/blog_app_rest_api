@@ -1,6 +1,7 @@
 const { blogSchema, Blog } = require("../models/blog");
 const Category = require("../models/category");
 const User = require("../models/user");
+var mongo = require('mongodb');
 
 exports.add_category = (req, res) => {
   User.find({ _id: req.userId })
@@ -71,9 +72,11 @@ exports.delete_category=(req,res)=>{
     })
   })
 }
-exports.get_all_categories=(req,res)=>{
-  Category.find().then((category)=>{
-    
+exports.get_all__user_categories=async(req,res)=>{
+
+  Category.find({followers:req.userId}).then(async(category)=>{
+  
+  
     res.status(200).json({
       category
     })
@@ -84,6 +87,25 @@ exports.get_all_categories=(req,res)=>{
   })
 
 }
+exports.get_all_categories=async(req,res)=>{
+
+ 
+  Category.find().sort({"category.name":1}).then(async(category)=>{
+
+    ////////////////// -1 a,b ////// 1 b,a
+    let sortedCategory = category.sort((a,b) => (a.followers.length > b.followers.length) ? -1 : ((b.followers.length < a.followers.length) ? 1 : 0));
+ console.log(sortedCategory);
+    res.status(200).json(
+      sortedCategory
+    )
+  }).catch((error)=>{
+    res.status(500).json({
+      error:error.message
+    })
+  })
+
+}
+
 exports.search_for_category=(req,res)=>{
   Category.find({name:{$regex:req.params.categoryName,$options:"i"}}).exec().then((results)=>{
 

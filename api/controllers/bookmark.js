@@ -31,6 +31,7 @@ const blogs=  Blog.find({ _id: req.params.blogId })
            else
            {
              const bookmark = new BookmarkBlogs({
+              userId:req.userId,
                Blogs: value,
              })
                .save()
@@ -86,8 +87,9 @@ exports.delete_bookmark = (req, res) => {
     });
 };
 exports.get_all_user_bookmark = (req, res) => {
-  BookmarkBlogs.find({ "Blogs.userId": req.userId })
+  BookmarkBlogs.find({ useId: req.userId })
     .then((bookmarkedBlogs) => {
+      console.log(bookmarkedBlogs)
       res.status(200).json(bookmarkedBlogs);
     })
     .catch((error) => {
