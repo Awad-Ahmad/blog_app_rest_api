@@ -22,7 +22,7 @@ mongoose
    console.log(error)
   });
   app.use("/api/auth",authRouter)
-  app.use("/api/user",userRouter)
+  app.use("/api/user",userRouter)   
   app.use('/api/category',categoryRouter)
   app.use('/api/blog',blogRouter)
   app.use("/api/bookmark",bookmarkRouter)
