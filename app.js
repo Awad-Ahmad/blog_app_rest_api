@@ -8,6 +8,8 @@ const categoryRouter=require("./api/routes/category")
 const bookmarkRouter=require("./api/routes/bookmark")
 var multer = require('multer');
 var upload = multer();
+require('dotenv').config()
+
 const app=express()
 app.use(bodyParser.json()); 
 
