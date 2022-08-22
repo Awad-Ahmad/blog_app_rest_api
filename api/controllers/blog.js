@@ -12,15 +12,16 @@ exports.add_blog = (req, res) => {
         console.log(user);
         Category.find({ name: req.body.categoryName })
           .then((category) => {
-            console.log(category);
             if (category.length >= 1) {
+              blogImageFile="https://blogappwithflutter.herokuapp.com/"+req.file.path.replace(/\\/g, '/')
+              console.log(blogImageFile)
               const blog = new Blog({
                 userId: req.userId,
                 nameOFAuthor: user[0].userName,
                 title: req.body.title,
                 mainText: req.body.mainText,
                 categoryName: req.body.categoryName,
-                blogImage: req.file.path,
+                blogImage: blogImageFile,
               })
                 .save()
                 .then((value) => {
