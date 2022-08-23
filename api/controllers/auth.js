@@ -74,6 +74,7 @@ exports.sign_up = (req, res) => {
                   public_id:"",
                 },
                 isAdmin: req.body.isAdmin,
+                bio:""
               })
                 .save()
                 .then((value) => {
