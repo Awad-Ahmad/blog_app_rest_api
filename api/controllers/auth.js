@@ -2,87 +2,91 @@ const User = require("../models/user");
 const bcrypt = require("bcryptjs");
 const fs = require("fs");
 const path = require("path");
+const upload = require("../utils/multer");
+const cloudinary = require("../utils/cloudinary");
 const jwt = require("jsonwebtoken");
 exports.sign_up = (req, res) => {
-  User.find({ email: req.body.email }).exec()
+  User.find({ email: req.body.email })
+    .exec()
     .then((user) => {
-      console.log(user)
+      console.log(user);
 
       if (user.length >= 1) {
-        console.log(req.files)
-        
-        if (req.files) {
-          profilePicturePath = path.join(
-            __dirname,
-            "../../",
-            req.files.profilePicture[0].path
-          );
-        } else {
-          profilePicturePath = null;
-        }
-        if(req.files)
- {
-          coverPicturePath = path.join(
-            __dirname,
-            "../../",
-            req.files.coverPicture[0].path
-          );
-        } else {
-          coverPicturePath = null;
-        }
-        console.log(coverPicturePath);
-        try {
-          if (profilePicturePath)
-            fs.unlink(profilePicturePath, (error) => {
-              console.log(error);
-            });
-          if (coverPicturePath)
-            fs.unlink(coverPicturePath, (error) => {
-              console.log(error);
-            });
+        //         if (req.files) {
+        //           profilePicturePath = path.join(
+        //             __dirname,
+        //             "../../",
+        //             req.files.profilePicture[0].path
+        //           );
+        //         } else {
+        //           profilePicturePath = null;
+        //         }
+        //         if(req.files)
+        //  {
+        //           coverPicturePath = path.join(
+        //             __dirname,
+        //             "../../",
+        //             req.files.coverPicture[0].path
+        //           );
+        //         } else {
+        //           coverPicturePath = null;
+        //         }
+        // console.log(coverPicturePath);
+        // try {
+        //   if (profilePicturePath)
+        //     fs.unlink(profilePicturePath, (error) => {
+        //       // console.log(error);
+        //     });
+        //   if (coverPicturePath)
+        //     fs.unlink(coverPicturePath, (error) => {
+        //       // console.log(error);
+        //     });
           res.status(404).json({
             message: "the user has been added before",
           });
-        } catch (error) {
-          return res.status(500).json({
-            error: error.message,
-          });
-        }
+        // } catch (error) {
+        //   return res.status(500).json({
+        //     error: error.message,
+        //   });
+        // }
       } else {
-        bcrypt.hash(req.body.password, 10, (err, hash) => {
+        bcrypt.hash(req.body.password, 10, async (err, hash) => {
           if (err) {
             return res.status(500).json({
               error: err.message,
             });
           } else {
-            if (req.files) {
-              console.log("true");
-            } else {
-              console.log("false");
-            }
-            const user = new User({
-              email: req.body.email,
-              password: hash,
-              userName: req.body.userName,
-              profilePicture: req.files
-                ? req.files.profilePicture[0].path
-                : "",
-              coverPicture: req.files
-                ? req.files.coverPicture[0].path
-                : "",
-              isAdmin: req.body.isAdmin,
-            })
-              .save()
-              .then((value) => {
-                res.status(201).json({
-                  message: "the user is created successfully ",
-                });
+           
+            // if (req.files) {
+            //   console.log("true");
+            // } else {
+            //   console.log("false");
+            // }
+            // console.log(req.files);
+            //   console.log(val);
+              const user = new User({
+                email: req.body.email,
+                password: hash,
+                userName: req.body.userName,
+                profilePicture: "",
+                coverPicture: {
+                  url: "",
+                  public_id:"",
+                },
+                isAdmin: req.body.isAdmin,
               })
-              .catch((error) => {
-                res.status(500).json({
-                  error: error.message,
+                .save()
+                .then((value) => {
+                  res.status(201).json({
+                    message: "the user is created successfully ",
+                  });
+                })
+                .catch((error) => {
+                  res.status(500).json({
+                    error: error.message,
+                  });
                 });
-              });
+            
           }
         });
       }

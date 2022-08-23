@@ -3,26 +3,24 @@ const Category = require("../models/category");
 const { Blog } = require("../models/blog");
 const fs = require("fs");
 const path = require("path");
+const upload = require("../utils/multer");
 
+const cloudinary = require("../utils/cloudinary");
 exports.delete_user = (req, res) => {
-  User.findById(req.userId)
+  User.find({_id:req.userId})
     .then((user) => {
-      if (user.length >= 1) {
+     console.log(user)
+      if (user.length>=1) {
         User.findByIdAndDelete(req.userId)
           .then(async (value) => {
+            console.log(value)
             var blogs = await Blog.find({ userId: req.userId });
 
             Blog.deleteMany({ userId: req.userId })
               .then((blog) => {
                 for (let i = 0; i < blogs.length; i++) {
-                  filePath = path.join(__dirname, "../../", value[i].image);
-                  try {
-                    fs.unlinkSync(filePath);
-                  } catch (error) {
-                    res.status(500).json({
-                      error: error,
-                    });
-                  }
+                  cloudinary.uploader.destroy(blogs[i].blogImage.public_id, function(result) { console.log(result) });
+
                 }
                 res.status(200).json({
                   message: "the user is deleted successfully",
@@ -85,18 +83,30 @@ exports.upload_user_images = (req, res) => {
       console.log(user.length);
       if (user.length >= 1) {
         console.log(req.file);
-        User.findByIdAndUpdate(req.userId, {
-          coverPicture: req.file.path,
-        })
-          .then((value) => {
-            res.status(200).json({
-              message: "the user has been updated",
-            });
+        const result = cloudinary.uploader
+          .upload(req.file.path)
+          .then((val) => {
+            User.findByIdAndUpdate(req.userId, {
+              coverPicture: { 
+                url: val.secure_url, 
+                public_id: val.public_id 
+              },
+            })
+              .then((value) => {
+                res.status(200).json({
+                  message: "the user has been updated",
+                });
+              })
+              .catch((error) => {
+                console.log(error);
+                res.status(500).json({
+                  error: error.message,
+                });
+              });
           })
-          .catch((error) => {
-            console.log(error);
+          .catch((err) => {
             res.status(500).json({
-              error: error.message,
+              error: err.message,
             });
           });
       } else {

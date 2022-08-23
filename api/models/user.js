@@ -31,9 +31,14 @@ userSchema = new mongoose.Schema({
   profilePicture: {
     type: String,
   },
-  coverPicture: {
-    type: String,
-  },
+  coverPicture:  {
+    url:{
+     type:String,
+    },
+    public_id:{
+     type:String,
+    }
+   },
   followers:[],
   categoriesFollowings:[],
   followings: {

@@ -4,6 +4,10 @@ const { Blog } = require("../models/blog");
 const blogRouter = require("../routes/blog");
 const mongoose = require("mongoose");
 var ObjectId = require("mongodb").ObjectId;
+const upload = require("../utils/multer");
+
+const cloudinary = require("../utils/cloudinary");
+
 
 exports.add_blog = (req, res) => {
   User.find({ _id: req.userId })
@@ -13,27 +17,34 @@ exports.add_blog = (req, res) => {
         Category.find({ name: req.body.categoryName })
           .then((category) => {
             if (category.length >= 1) {
-              blogImageFile="https://blogappwithflutter.herokuapp.com/"+req.file.path.replace(/\\/g, '/')
-              console.log(blogImageFile)
+              
+              const result = cloudinary.uploader.upload(req.file.path).then((val)=>{
               const blog = new Blog({
-                userId: req.userId,
-                nameOFAuthor: user[0].userName,
-                title: req.body.title,
-                mainText: req.body.mainText,
-                categoryName: req.body.categoryName,
-                blogImage: blogImageFile,
-              })
-                .save()
-                .then((value) => {
-                  res
-                    .status(201)
-                    .json({ message: "the blog is created successfully" });
+                  userId: req.userId,
+                  nameOFAuthor: user[0].userName,
+                  title: req.body.title,
+                  mainText: req.body.mainText,
+                  categoryName: category[0].name,
+                  blogImage: {
+                    url:val.secure_url,
+                    public_id:val.public_id
+                  },
                 })
-                .catch((error) => {
-                  res.status(500).json({
-                    error: error.message,
+                  .save()
+                  .then((value) => {
+                    res
+                      .status(201)
+                      .json({ message: "the blog is created successfully" });
+                  })
+                  .catch((error) => {
+                    res.status(500).json({
+                      error: error.message,
+                    });
                   });
-                });
+
+              }).catch((error)=>res.status(500).json({error:error.message}))
+
+             
             } else {
               try {
                 filePath = path.join(__dirname, "../../", req.files.path[0]);
