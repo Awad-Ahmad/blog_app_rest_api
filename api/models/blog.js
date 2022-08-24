@@ -10,6 +10,9 @@ const blogSchema = new mongoose.Schema(
       required:true
 
     },
+    userImage:{
+    type:String
+    },
     title: {
       type: String,
       required: true,

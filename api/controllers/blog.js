@@ -23,6 +23,7 @@ exports.add_blog = (req, res) => {
                   userId: req.userId,
                   nameOFAuthor: user[0].userName,
                   title: req.body.title,
+                  userImage:user[0].coverPicture.url,
                   mainText: req.body.mainText,
                   categoryName: category[0].name,
                   blogImage: {
