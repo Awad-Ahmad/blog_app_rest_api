@@ -106,7 +106,7 @@ const blogs=  Blog.find({ _id: req.params.blogId })
 
   } else {
     res.status(404).json({
-      message: "the blog is not found ",
+      message: "the  bookmark blog is not found ",
     });
   }
   // BookmarkBlogs.deleteOne({ _id: req.params.bookmarkId })
