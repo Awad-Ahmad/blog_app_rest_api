@@ -73,7 +73,7 @@ const blogs=  Blog.find({ _id: req.params.blogId })
 
   if (blog.length >= 1) {
   
-     Blog.findByIdAndUpdate(req.params.blogId,{isBookMarked:true}, { new: true }).then(async (value)=>{
+     Blog.findByIdAndUpdate(req.params.blogId,{isBookMarked:false}, { new: true }).then(async (value)=>{
       console.log(value)
       const isBookMarked =await BookmarkBlogs.find({
         "Blogs._id":req.params.blogId
