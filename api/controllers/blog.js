@@ -17,6 +17,7 @@ exports.add_blog = (req, res) => {
         Category.find({ name: req.body.categoryName })
           .then((category) => {
             if (category.length >= 1) {
+                console.log(user[0].coverPicture.url)
               
               const result = cloudinary.uploader.upload(req.file.path).then((val)=>{
               const blog = new Blog({
