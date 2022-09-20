@@ -4,11 +4,15 @@ const multer = require("multer");
 const authController = require("../controllers/auth");
 const auth = require("../middleware/auth");
 const { isEmailExist } = require("../middleware/isEmailExist");
+const { authValidation } = require("../middleware/validation/auth_validate");
+const { loginAuthValidation } = require("../middleware/validation/login_auth_validation");
 const upload = require("../utils/multer");
 
 authRouter.post(
   "/sign-up",
+  authValidation,
   isEmailExist
+
   
   ,upload.fields([{
       name: "profilePicture",
@@ -18,6 +22,6 @@ authRouter.post(
   ]),
   authController.sign_up
 );
-authRouter.post('/login',authController.login)
+authRouter.post('/login',loginAuthValidation,authController.login)
 
 module.exports = authRouter;

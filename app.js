@@ -30,6 +30,6 @@ mongoose
   app.use('/api/category',categoryRouter)
   app.use('/api/blog',blogRouter)
   app.use("/api/bookmark",bookmarkRouter)
-  const port = process.env.PORT|| 3002
+  const port = process.env.PORT|| 3000
 
 app.listen(port, () => console.log("connected")); 

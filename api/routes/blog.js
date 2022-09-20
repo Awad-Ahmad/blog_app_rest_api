@@ -4,6 +4,8 @@ const multer = require("multer");
 const blogController = require("../controllers/blog");
 const { auth } = require("../middleware/auth");
 const upload = require("../utils/multer");
+const { Blog } = require("../models/blog");
+const { paginatedResponse } = require("../middleware/paginated_reposnse");
 
 blogRouter.post(
   "/add-blog",
@@ -17,5 +19,9 @@ blogRouter.post("/search_for_blog/:blogTitle",auth,blogController.search_for_blo
 blogRouter.get("/get-all-my-blogs",auth,blogController.get_all_my_blogs)
 blogRouter.post("/get-blogs-for-specific-user/:userId",auth,blogController.get_blogs_for_specific_user)
 blogRouter.get("/",blogController.get__all_blogs)
+blogRouter.get("/with-limit",paginatedResponse(Blog),(req,res)=>{
+  res.status(200).json(res.paginatedResponse)
+})
+
 blogRouter.post("/add-to-blog-a-read/:blogId",auth,blogController.add_to_blog_a_read)
 module.exports = blogRouter;

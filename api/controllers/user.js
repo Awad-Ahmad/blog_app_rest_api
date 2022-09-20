@@ -7,20 +7,24 @@ const upload = require("../utils/multer");
 
 const cloudinary = require("../utils/cloudinary");
 exports.delete_user = (req, res) => {
-  User.find({_id:req.userId})
+  User.find({ _id: req.userId })
     .then((user) => {
-     console.log(user)
-      if (user.length>=1) {
+      console.log(user);
+      if (user.length >= 1) {
         User.findByIdAndDelete(req.userId)
           .then(async (value) => {
-            console.log(value)
+            console.log(value);
             var blogs = await Blog.find({ userId: req.userId });
 
             Blog.deleteMany({ userId: req.userId })
               .then((blog) => {
                 for (let i = 0; i < blogs.length; i++) {
-                  cloudinary.uploader.destroy(blogs[i].blogImage.public_id, function(result) { console.log(result) });
-
+                  cloudinary.uploader.destroy(
+                    blogs[i].blogImage.public_id,
+                    function (result) {
+                      console.log(result);
+                    }
+                  );
                 }
                 res.status(200).json({
                   message: "the user is deleted successfully",
@@ -82,20 +86,31 @@ exports.upload_user_images = (req, res) => {
     .then((user) => {
       console.log(user.length);
       if (user.length >= 1) {
-        console.log(req.file);
         const result = cloudinary.uploader
           .upload(req.file.path)
           .then((val) => {
             User.findByIdAndUpdate(req.userId, {
-              coverPicture: { 
-                url: val.secure_url, 
-                public_id: val.public_id 
+              coverPicture: {
+                url: val.secure_url,
+                public_id: val.public_id,
               },
             })
               .then((value) => {
-                res.status(200).json({
-                  message: "the user has been updated",
-                });
+                Blog.updateMany(
+                  { userId: req.userId },
+                  {
+                    userImage: val.secure_url,
+                  }
+                )
+                  .then((val) => {
+                    console.log(val);
+                    res.status(200).json({
+                      message: "the user has been updated",
+                    });
+                  })
+                  .catch((error) => {
+                    res.status(500).json({ error: error.message });
+                  });
               })
               .catch((error) => {
                 console.log(error);

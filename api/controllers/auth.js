@@ -41,9 +41,9 @@ exports.sign_up = (req, res) => {
         //     fs.unlink(coverPicturePath, (error) => {
         //       // console.log(error);
         //     });
-          res.status(404).json({
-            message: "the user has been added before",
-          });
+        res.status(404).json({
+          message: "the user has been added before",
+        });
         // } catch (error) {
         //   return res.status(500).json({
         //     error: error.message,
@@ -56,7 +56,6 @@ exports.sign_up = (req, res) => {
               error: err.message,
             });
           } else {
-           
             // if (req.files) {
             //   console.log("true");
             // } else {
@@ -64,30 +63,29 @@ exports.sign_up = (req, res) => {
             // }
             // console.log(req.files);
             //   console.log(val);
-              const user = new User({
-                email: req.body.email,
-                password: hash,
-                userName: req.body.userName,
-                profilePicture: "",
-                coverPicture: {
-                  url: "",
-                  public_id:"",
-                },
-                isAdmin: req.body.isAdmin,
-                bio:""
-              })
-                .save()
-                .then((value) => {
-                  res.status(201).json({
-                    message: "the user is created successfully ",
-                  });
-                })
-                .catch((error) => {
-                  res.status(500).json({
-                    error: error.message,
-                  });
+            const user = new User({
+              email: req.body.email,
+              password: hash,
+              userName: req.body.userName,
+              profilePicture: "",
+              coverPicture: {
+                url: "",
+                public_id: "",
+              },
+              isAdmin: req.body.isAdmin,
+              bio: "",
+            })
+              .save()
+              .then((value) => {
+                res.status(201).json({
+                  message: "the user is created successfully ",
                 });
-            
+              })
+              .catch((error) => {
+                res.status(500).json({
+                  error: error.message,
+                });
+              });
           }
         });
       }
